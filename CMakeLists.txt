@@ -7,8 +7,8 @@ set(CMAKE_CXX_FLAS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -march=native")
 
 find_package(SDL2 REQUIRED)
 
-add_executable(my-opengl4-program
-	main.cpp
+add_executable(my-opengl4-program 
+				main.cpp
 )
 
 target_include_directories(my-opengl4-program PUBLIC
