@@ -20,6 +20,8 @@ const int SCREEN_HEIGHT = 480;
 static SDL_Window *g_window = nullptr;
 static SDL_GLContext g_maincontext;
 
+bool gRenderQuad = false;
+
 
 static void sdl_die(const char *message) {
 	fprintf(stderr, "%s: %s\n", message, SDL_GetError());
@@ -54,8 +56,10 @@ void init_screen(const char *caption) {
 		sdl_die("Failed to create OpenGL context");
 
 	// Check OpenGL properties
-	printf("OpenGL loaded\n");
-	//....
+	printf("OpenGL loaded.\n");
+	printf("Vendor:   %s\n", glGetString(GL_VENDOR));
+	printf("Renderer: %s\n", glGetString(GL_RENDERER));
+	printf("Version:  %s\n", glGetString(GL_VERSION));
 
 	// Use v-sync
 	SDL_GL_SetSwapInterval(1);
@@ -63,6 +67,17 @@ void init_screen(const char *caption) {
 	// Disable depth test and face culling.
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
+
+}
+
+void render()
+{
+	int w,h;
+	// Clear color buffer
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	SDL_GetWindowSize(g_window, &w, &h);
+//	glViewport(0, 0, w, h);
+//	glClearColor(0.0f, 0.2f, 0.4f, 0.0f);
 
 }
 
@@ -75,18 +90,26 @@ int main(int argc, char *argv[])
 	init_screen("OpenGL 4.5");
 
 	while (!quit) {
-		SDL_GL_SwapWindow(g_window);
+
 		while (SDL_PollEvent(&ev)) {
-			if (ev.type == SDL_QUIT || ev.type == SDLK_q)
+			if (ev.type == SDL_QUIT || ev.key.keysym.sym == SDLK_q)
 				quit = true;
+			else if (ev.key.keysym.sym == SDLK_f) {
+				gRenderQuad = true;
+				printf("render quad!\n");
+			}
+
 		}
-//		int w,h;
-//		  SDL_GetWindowSize(window, &w, &h);
-//		  glViewport(0, 0, w, h);
-//		  glClearColor(0.0f, 0.5f, 1.0f, 0.0f);
+		render();
+
+		SDL_GL_SwapWindow(g_window);
 	}
 
-
+	/* Delete our opengl context, destroy our window, and shutdown SDL */
+	SDL_GL_DeleteContext(g_maincontext);
+	SDL_DestroyWindow(g_window);
+	SDL_Quit();
+	printf("Done\n");
 	return 0;
 }
 
