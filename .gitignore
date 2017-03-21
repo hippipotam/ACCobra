@@ -1,2 +1,5 @@
 Debug
 build/
+/Default/
+.cproject
+.settings/
