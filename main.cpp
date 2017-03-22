@@ -60,6 +60,7 @@ void init_screen(const char *caption) {
 	printf("Vendor:   %s\n", glGetString(GL_VENDOR));
 	printf("Renderer: %s\n", glGetString(GL_RENDERER));
 	printf("Version:  %s\n", glGetString(GL_VERSION));
+	printf("GLSL:     %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	// Use v-sync
 	SDL_GL_SetSwapInterval(1);
