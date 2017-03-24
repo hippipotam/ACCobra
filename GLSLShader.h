@@ -10,6 +10,8 @@
 
 #include <string>
 #include <map>
+//#include <GL/gl.h>
+#include <glad/glad.h>
 
 class GLSLShader {
 public:
