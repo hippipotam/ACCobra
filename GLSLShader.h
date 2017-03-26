@@ -13,6 +13,7 @@
 //#include <GL/gl.h>
 #include <glad/glad.h>
 
+
 class GLSLShader {
 public:
 	GLSLShader();
@@ -25,6 +26,8 @@ public:
 	void UnUse();
 	void AddAttribute(const std::string &attribute);
 	void AddUniform(const std::string &uniform);
+	GLuint operator[] (const std::string &attribute);
+	GLuint operator() (const std::string &uniform);
 	void DeleteShaderProgram();
 
 private:
