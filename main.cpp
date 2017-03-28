@@ -120,7 +120,7 @@ void OnInit()
 		shader.AddUniform("MVP");
 	shader.UnUse();
 
-	std::cout << "Attribute: " << shader["vVertex"] << "," << shader["vColor"] << ", " << shader["fuck"] << std::endl;
+	std::cout << "Attribute: " << shader["vVertex"] << "," << shader["vColor"] << std::endl; //", " << shader["fuck"] << std::endl;
 
 	// Create geometry and topology
 	vertices[0].color = glm::vec3(1,0,0);
@@ -136,6 +136,8 @@ void OnInit()
 	indices[2] = 2;
 
 	GLsizei stride = sizeof(Vertex);
+
+	printf("stride=%ld, vertices=%ld\n", sizeof(Vertex), sizeof(vertices));
 
 	// Store the geometry and topology in the buffer objects
 	glGenVertexArrays(1, &vaoID);
@@ -175,53 +177,11 @@ void OnShutdown()
 
 void OnRender()
 {
-
 	glm::mat4 model_matrix;
 	// Setup
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	shader.Use();
 
-	// Set up the model and projection matrix
-//	  glm::mat4 projection_matrix(glm::frustum(-1.0f, 1.0f, -g_aspect, g_aspect, 1.0f, 500.0f));
-//	  glUniformMatrix4fv(render_projection_matrix_loc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
-//	  render_model_matrix_loc
-	  // Set up for a glDrawElements call
-//	  glBindVertexArray(vao);
-//	  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-	  // Draw Arrays...
-//	  model_matrix = glm::translate(glm::mat4(1.0f),glm::vec3(-3.0f, 0.0f, -5.0f));
-//	  glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(model_matrix));
-//	  glDrawArrays(GL_TRIANGLES, 0, 3);
-//
-//	  // DrawElements
-//	  model_matrix = glm::translate(glm::mat4(1.0f),glm::vec3(-1.0f, 0.0f, -5.0f));
-//	  glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(model_matrix));
-//	  glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, NULL);
-//
-//	  // DrawElementsBaseVertex
-//	  model_matrix = glm::translate(glm::mat4(1.0f),glm::vec3(1.0f, 0.0f, -5.0f));
-//	  glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(model_matrix));
-//	  glDrawElementsBaseVertex(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, NULL, 1);
-//
-//	  // DrawArraysInstanced
-//	  model_matrix = glm::translate(glm::mat4(1.0f),glm::vec3(3.0f, 0.0f, -5.0f));
-//	  glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(model_matrix));
-//	  glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
-
-//	shader.UnUse();
-
-	// Set up the model and projection matrix
-//	glm::mat4 projection_matrix(glm::frustum(-1.0f, 1.0f, -g_aspect, g_aspect, 1.0f, 500.0f));
-//	model_matrix = glm::translate(glm::mat4(1.0f),glm::vec3(-1.0f, 0.0f, -5.0f));
-//	glUniformMatrix4fv(shader("MVP"), 1, GL_FALSE, glm::value_ptr(model_matrix));
-//	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
-
-//	int w,h;
-//	SDL_GetWindowSize(g_window, &w, &h);
-//	OnResize(w, h);
 	// Clear color buffer
 	glClearColor(0.0f, 0.2f, 0.4f, 0.0f);
 	glm::mat4 MV = glm::mat4(1.0); // Identity modelview matrix
@@ -234,7 +194,6 @@ void OnRender()
 //	SDL_GetWindowSize(g_window, &w, &h);
 //	glViewport(0, 0, w, h);
 //	glClearColor(0.0f, 0.2f, 0.4f, 0.0f);
-
 
 }
 
@@ -250,7 +209,10 @@ int main(int argc, char *argv[])
 
 	int w,h;
 	SDL_GetWindowSize(g_window, &w, &h);
+
 	OnResize(w, h);
+	OnInit();
+	printf("WSize [ %d; %d ]\n", w, h);
 
 	while (!quit) {
 

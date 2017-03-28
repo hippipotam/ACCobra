@@ -11,7 +11,7 @@
 #include <iostream>
 #include <cstdio>
 
-#define LOG cout << "[ " << __FUNCTION__ << " ]: "
+#define INFO_LOG() cout << "[ " << __FUNCTION__ << " ]: "
 
 //#define INFO_LOG(...) fprintf(cerr, __VA_ARGS__);
 //cout << "[ INFO ]-[ " << __FUNCTION__ << " ]: " << __VA_ARGS__ << endl
@@ -128,7 +128,7 @@ void GLSLShader::AddAttribute(const std::string &attribute)
 	if (location < 0)
 		cerr << "[ " << __FUNCTION__ << " ] cannot get attribute location \"" << attribute << "\""<< endl;
 	else {
-		cout << __FUNCTION__ << ": " << location << " (\"" << attribute << "\")" << endl;
+		INFO_LOG() << ": " << location << " (\"" << attribute << "\")" << endl;
 		m_attributeList.emplace(attribute, location);
 	}
 }
@@ -139,7 +139,7 @@ void GLSLShader::AddUniform(const std::string &uniform)
 	if (location < 0)
 		cerr << "[ " << __FUNCTION__ << " ] cannot get uniform location \"" << uniform << "\"" << endl;
 	else {
-		LOG << "Ha bla!" << endl;
+		INFO_LOG() << location << " (\"" << uniform << "\")" << endl;
 //		ERR_LOG("Cannot find attribute \"" attribute);
 		//cout << __FUNCTION__ << ": " << location << " (\"" << uniform << "\")" << endl;
 		m_uniformLocationList.emplace(uniform, location);
