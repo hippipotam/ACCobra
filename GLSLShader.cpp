@@ -85,8 +85,19 @@ void GLSLShader::CreateAndLinkProgram()
 	GLint success;
 	GLchar infoLog[512];
 
-	m_program = glCreateProgram();
 
+	// glCreateProgram
+	// glAttachShader
+	// glLinkProgram
+	// glGetProgramInfoLog
+
+	// Create a program object
+	m_program = glCreateProgram();
+	if (!m_program)
+		// TODO error
+		perror("Create program.");
+
+	// Attach shaders to program
 	for (int i = 0; i < m_totalShaders; i++)
 		glAttachShader(m_program, m_shaders[i]);
 
@@ -99,15 +110,10 @@ void GLSLShader::CreateAndLinkProgram()
 		printf("Error: linking error: %s\n", infoLog);
 	}
 
+	// Delete shaders
 	for (int i = 0; i < m_totalShaders; i++)
 		glDeleteShader(m_shaders[i]);
 	m_totalShaders = 0;
-
-
-	// glCreateProgram
-	// glAttachShader
-	// glLinkProgram
-	// glGetProgramInfoLog
 }
 
 void GLSLShader::Use()
@@ -144,7 +150,6 @@ void GLSLShader::AddUniform(const std::string &uniform)
 		//cout << __FUNCTION__ << ": " << location << " (\"" << uniform << "\")" << endl;
 		m_uniformLocationList.emplace(uniform, location);
 	}
-//	INFO_LOG("Hey ho!");
 }
 
 GLuint GLSLShader::operator[] (const std::string &attribute)

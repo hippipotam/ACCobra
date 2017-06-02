@@ -61,5 +61,5 @@ bool SDLGui::Init()
 //	} else cout << "[ OK ]" << endl;
 //
 //	SDL_SetRenderDrawColor(m_renderer, 0xFF, 0xFF, 0xFF, 0x00);
-	return true;
+	return success;
 }
