@@ -5,17 +5,19 @@
  *      Author: rik
  */
 
-#include "GLSLShader.h"
-//#include <cstdio>
+
 #include <fstream>
-#include <iostream>
+//#include <iostream>
 #include <cstdio>
 
-#define INFO_LOG() cout << "[ " << __FUNCTION__ << " ]: "
+#include "GLSLShader.h"
+#include "log.h"
 
-//#define INFO_LOG(...) fprintf(cerr, __VA_ARGS__);
-//cout << "[ INFO ]-[ " << __FUNCTION__ << " ]: " << __VA_ARGS__ << endl
-#define ERR_LOG(x) 	cerr << "[ ERRO+ ]-[ " << __FUNCTION__ << " ]: " << x << endl
+//#define INFO_LOG() cout << "[ " << __FUNCTION__ << " ]: "
+//
+////#define INFO_LOG(...) fprintf(cerr, __VA_ARGS__);
+////cout << "[ INFO ]-[ " << __FUNCTION__ << " ]: " << __VA_ARGS__ << endl
+//#define ERR_LOG(x) 	cerr << "[ ERRO+ ]-[ " << __FUNCTION__ << " ]: " << x << endl
 
 using namespace std;
 
@@ -132,7 +134,7 @@ void GLSLShader::AddAttribute(const std::string &attribute)
 {
 	GLint location = glGetAttribLocation(m_program, attribute.c_str());
 	if (location < 0)
-		cerr << "[ " << __FUNCTION__ << " ] cannot get attribute location \"" << attribute << "\""<< endl;
+		ERRO_LOG() << "cannot get attribute location \"" << attribute << "\""<< endl;
 	else {
 		INFO_LOG() << ": " << location << " (\"" << attribute << "\")" << endl;
 		m_attributeList.emplace(attribute, location);

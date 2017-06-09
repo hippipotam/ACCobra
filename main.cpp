@@ -6,50 +6,27 @@
  */
 
 #include <cstdlib>
-#include <cstdlib>
 #include <iostream>
 
-//#include "SDLGui.h"
-#include <SDL2/SDL.h>
+//#include <SDL2/SDL.h>
 //#include <GL/gl.h>
-#include "GLSLShader.h"
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
+
+#include "SDLGui.h"
+#include "log.h"
 
 //using namespace std;
 
-const int SCREEN_FULLSCREEN = 1;
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
 
 
-static SDL_Window *g_window = nullptr;
-static SDL_GLContext g_maincontext;
-GLSLShader shader;
+//static SDL_Window *g_window = nullptr;
+//static SDL_GLContext g_maincontext;
+//GLSLShader shader;
 
 bool gRenderQuad = false;
 
-struct Vertex {
-	glm::vec3 position;
-	glm::vec3 color;
-};
-
-Vertex vertices[3];
-GLushort indices[3];
-
-GLuint vaoID;
-GLuint vboVerticesID;
-GLuint vboIndicesID;
-
-glm::mat4 P;
-glm::mat4 MV;
-
-float g_aspect;
 
 
-
-
-
+#if 0
 static void sdl_die(const char *message) {
 	fprintf(stderr, "%s: %s\n", message, SDL_GetError());
 	exit(2);
@@ -113,6 +90,8 @@ void OpenGLSettings()
 	glViewport(0, 0, vpWidth, vpHeight);
 }
 
+#endif
+#if 0
 void OnInit()
 {
 	shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/shader1.vert");
@@ -175,7 +154,7 @@ void OnInit()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
 
 }
-
+#endif
 //template <typename valType>
 //GLM_FUNC_QUALIFIER detail::tmat4x4<valType> ortho
 //(
@@ -196,13 +175,12 @@ void OnInit()
 //    Result[3][2] = - (zFar + zNear) / (zFar - zNear);
 //    return Result;
 //}
-
+#if 0
 void OnResize(int w, int h)
 {
 	glViewport(0, 0, (GLsizei) w, (GLsizei) h);
 	g_aspect = float(h) / float(w);
 	// Orthographic projection matrix
-//	P = glm::ortho<GLfloat>( 0.0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0, 1.0, -1.0 );
 	P = glm::ortho<GLfloat>(-1.f,1.f,-1.f,1.f);
 //	P = glm::ortho(-1.f,1.f,-1.f,1.f);
 }
@@ -239,31 +217,37 @@ void OnRender()
 //	glViewport(0, 0, w, h);
 //	glClearColor(0.0f, 0.2f, 0.4f, 0.0f);
 }
-
+#endif
 
 int main(int argc, char *argv[])
 {
 //	SDLGui sdl;
+
+	SDLGui SDLGuiWrapper;
 	SDL_Event ev;
 	bool quit = false;
 	int w,h;
 
-	InitScreen("OpenGL 4.5");
-	SoftwareVersions();
+	if (!SDLGuiWrapper.Init("OpenGL 4.5")) {
+		// TODO exit
+		ERRO_LOG() << "Can't initialize openGL";
+		exit(1);
+	}
 
+//	InitScreen("OpenGL 4.5");
+//	SoftwareVersions();
 
-	SDL_GetWindowSize(g_window, &w, &h);
+	SDLGuiWrapper.OpenGLSettings();
 
-	OpenGLSettings();
-
-	OnResize(w, h);
+	SDLGuiWrapper.Resize();
+//	SDL_GetWindowSize(g_window, &w, &h);
+//	OnResize(w, h);
 //	P = glm::ortho(0.f,1.f,0.f,1.f,-1.f,1.f);
 
-	OnInit();
+	SDLGuiWrapper.OnInit();
 	printf("WSize [ %d; %d ]\n", w, h);
 
 	while (!quit) {
-
 		while (SDL_PollEvent(&ev)) {
 			if (ev.type == SDL_QUIT || ev.key.keysym.sym == SDLK_q)
 				quit = true;
@@ -271,18 +255,18 @@ int main(int argc, char *argv[])
 				gRenderQuad = true;
 				printf("render quad!\n");
 			}
-
 		}
-		OnRender();
+		SDLGuiWrapper.OnRender();
 
-		SDL_GL_SwapWindow(g_window);
+		SDLGuiWrapper.SwapWindow();
+//		SDL_GL_SwapWindow(g_window);
 	}
 
 	/* Delete our opengl context, destroy our window, and shutdown SDL */
-	OnShutdown();
-	SDL_GL_DeleteContext(g_maincontext);
-	SDL_DestroyWindow(g_window);
-	SDL_Quit();
+	SDLGuiWrapper.OnShutdown();
+//	SDL_GL_DeleteContext(m_maincontext);
+//	SDL_DestroyWindow(m_window);
+//	SDL_Quit();
 	printf("Done\n");
 	return 0;
 }
