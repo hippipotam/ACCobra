@@ -21,8 +21,8 @@ class SDLGui {
 	SDL_Window *m_window;
 	SDL_GLContext m_maincontext;
 	GLSLShader m_shader;
-//	SDL_Renderer *m_renderer;
-//	SDL_Event event;
+
+	GLint m_vpWidth, m_vpHeight; // viewport width and height
 
 	struct Vertex {
 		glm::vec3 position;
@@ -41,13 +41,16 @@ class SDLGui {
 
 	float g_aspect;
 
+	void OnResize(int w, int h);
+
 public:
 	SDLGui();
 	virtual ~SDLGui();
 
 	bool Init(const char *caption);
+
 	void SoftwareVersions();
-	void OpenGLSettings();
+
 	void OnShutdown();
 	void Resize();
 

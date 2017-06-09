@@ -13,13 +13,10 @@
 SDLGui::SDLGui() :
 	m_window(nullptr),
 	m_maincontext(nullptr)
-//	m_renderer(nullptr)
 {
-	// TODO Auto-generated constructor stub
 }
 
 SDLGui::~SDLGui() {
-	// TODO Auto-generated destructor stub
 	SDL_GL_DeleteContext(m_maincontext);
 	SDL_DestroyWindow(m_window);
 	SDL_Quit();
@@ -34,8 +31,7 @@ bool SDLGui::Init(const char *caption)
 		ERRO_LOG() << "Couldn't initialize SDL.";
 		return false;
 	}
-		// TODO Exit with "Couldn't initialize SDL"
-//		sdl_die("Couldn't initialize SDL.");
+	//		sdl_die("Couldn't initialize SDL.");
 	atexit(SDL_Quit);
 
 	// Default OpenGL is fine.
@@ -77,6 +73,13 @@ bool SDLGui::Init(const char *caption)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
+
+
+	// Set OpenGL viewport
+	SDL_GL_GetDrawableSize(m_window, &m_vpWidth, &m_vpHeight);
+	glViewport(0, 0, m_vpWidth, m_vpHeight);
+	printf("Drawable size: w %d, h %d\n", m_vpWidth, m_vpHeight);
+
 	return success;
 }
 
@@ -90,15 +93,6 @@ void SDLGui::SoftwareVersions()
 	printf("GLSL:     %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
-void SDLGui::OpenGLSettings()
-{
-	GLint vpWidth, vpHeight; // viewport width and height
-	SDL_GL_GetDrawableSize(m_window, &vpWidth, &vpHeight);
-	printf("Drawable size: w %d, h %d\n", vpWidth, vpHeight);
-
-	glViewport(0, 0, vpWidth, vpHeight);
-}
-
 void SDLGui::OnShutdown()
 {
 	m_shader.DeleteShaderProgram();
@@ -107,11 +101,18 @@ void SDLGui::OnShutdown()
 	glDeleteVertexArrays(1, &vaoID);
 }
 
+void SDLGui::OnResize(int w, int h) {
+	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
+	g_aspect = float(h) / float(w);
+	P = glm::ortho(-1,1,-1,1);
+}
+
 void SDLGui::Resize()
 {
 	int w, h;
 	SDL_GetWindowSize(m_window, &w, &h);
-//	OnResize(w, h);
+	OnResize(w, h);
+
 }
 
 void SDLGui::SwapWindow()
