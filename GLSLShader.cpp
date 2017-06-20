@@ -133,10 +133,9 @@ void GLSLShader::UnUse()
 void GLSLShader::AddAttribute(const std::string &attribute)
 {
 	GLint location = glGetAttribLocation(m_program, attribute.c_str());
-	if (location < 0)
-		ERRO_LOG() << "cannot get attribute location \"" << attribute << "\""<< endl;
+	if (location < 0) ERRO_LOG() << "annot get attribute location \"" << attribute << "\""<< endl;
 	else {
-		INFO_LOG() << ": " << location << " (\"" << attribute << "\")" << endl;
+		INFO_LOG() << location << " (\"" << attribute << "\")" << endl;
 		m_attributeList.emplace(attribute, location);
 	}
 }
@@ -144,12 +143,9 @@ void GLSLShader::AddAttribute(const std::string &attribute)
 void GLSLShader::AddUniform(const std::string &uniform)
 {
 	GLint location = glGetUniformLocation(m_program, uniform.c_str());
-	if (location < 0)
-		cerr << "[ " << __FUNCTION__ << " ] cannot get uniform location \"" << uniform << "\"" << endl;
+	if (location < 0) ERRO_LOG() << "Cannot get uniform location \"" << uniform << "\"" << endl;
 	else {
 		INFO_LOG() << location << " (\"" << uniform << "\")" << endl;
-//		ERR_LOG("Cannot find attribute \"" attribute);
-		//cout << __FUNCTION__ << ": " << location << " (\"" << uniform << "\")" << endl;
 		m_uniformLocationList.emplace(uniform, location);
 	}
 }
@@ -160,8 +156,7 @@ GLuint GLSLShader::operator[] (const std::string &attribute)
 	try {
 		res = m_attributeList.at(attribute);
 	} catch(...) {
-
-		cerr << "[ " << __FUNCTION__ << " ] Cannot find attribute \"" << attribute << "\"" << endl;
+		ERRO_LOG() << "Cannot find attribute \"" << attribute << "\"" << endl;
 		res = 0;
 	}
 	return res;
@@ -174,7 +169,6 @@ GLuint GLSLShader::operator() (const std::string &uniform)
 
 void GLSLShader::DeleteShaderProgram()
 {
-	//TODO DeleteShaderProgram
 	for (int i = 0; i < m_totalShaders; i++)
 		glDeleteShader(m_shaders[i]);
 	m_totalShaders = 0;

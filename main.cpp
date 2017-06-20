@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
 		SDLGuiWrapper.OnRender();
 
 		SDLGuiWrapper.SwapWindow();
-//		SDL_GL_SwapWindow(g_window);
 	}
 
 	/* Delete our opengl context, destroy our window, and shutdown SDL */

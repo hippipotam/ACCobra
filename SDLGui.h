@@ -11,11 +11,20 @@
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <vector>
 #include "GLSLShader.h"
+
 
 const int SCREEN_FULLSCREEN = 1;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
+
+const int NUM_X = 3;
+const int NUM_Z = 3;
+const int SIZE_X = 3;
+const int SIZE_Z = 3;
+const int HALF_SIZE_X = SIZE_X / 2;
+const int HALF_SIZE_Z = SIZE_Z / 2;
 
 class SDLGui {
 	SDL_Window *m_window;
@@ -41,7 +50,20 @@ class SDLGui {
 
 	float g_aspect;
 
+private:
 	void OnResize(int w, int h);
+	/* Load shaders
+	 * 	vshader		: path to vertex shader
+	 * 	fhsader		: path to fragment shader
+	 * 	attributes	: attributes
+	 * 	uniforms	: uniforms
+	 */
+	void LoadShaders(const std::string& vshader, const std::string& fshader, std::vector<std::string> attributes, std::vector<std::string> uniforms);
+
+	/* Create geometry and topology */
+	void CreateSimpleColoredTriangle();
+	void CreateRippleMesh();
+	void CreateGeometryAndTopology();
 
 public:
 	SDLGui();
@@ -55,6 +77,8 @@ public:
 	void Resize();
 
 	void OnInit();
+	void OnInit2();
+
 	void OnRender();
 
 	void SwapWindow();

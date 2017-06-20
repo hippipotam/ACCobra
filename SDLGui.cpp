@@ -8,7 +8,7 @@
 #include "SDLGui.h"
 #include "log.h"
 
-//using namespace std;
+using namespace std;
 
 SDLGui::SDLGui() :
 	m_window(nullptr),
@@ -73,8 +73,6 @@ bool SDLGui::Init(const char *caption)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
-
-
 	// Set OpenGL viewport
 	SDL_GL_GetDrawableSize(m_window, &m_vpWidth, &m_vpHeight);
 	glViewport(0, 0, m_vpWidth, m_vpHeight);
@@ -120,22 +118,34 @@ void SDLGui::SwapWindow()
 	SDL_GL_SwapWindow(m_window);
 }
 
-void SDLGui::OnInit()
+void SDLGui::LoadShaders(const string& vshader, const string& fshader, vector<string> attributes, vector<string> uniforms)
 {
-	m_shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/shader1.vert");
-	m_shader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/shader1.frag");
+	// Load shaders
+	m_shader.LoadFromFile(GL_VERTEX_SHADER, vshader);
+	m_shader.LoadFromFile(GL_FRAGMENT_SHADER, fshader);
 	m_shader.CreateAndLinkProgram();
 	m_shader.Use();
-		m_shader.AddAttribute("vVertex");
-		m_shader.AddAttribute("vColor");
-		m_shader.AddUniform("MVP");
+		// Add attributes
+		for (auto &attr : attributes)
+			m_shader.AddAttribute(attr);
+		// Add Uniforms
+		for (auto &uni : uniforms)
+			m_shader.AddUniform(uni);
 	m_shader.UnUse();
 
-	std::cout << "Attribute: " << m_shader["vVertex"] << "," << m_shader["vColor"] << std::endl;
+	// Debug messages
+	INFO_LOG() << "Attribute:" << endl;
+		for (auto &attr : attributes)
+			INFO_LOG() << "\t\"" << attr << "\" : " << m_shader[attr] << endl;
+	INFO_LOG() << "Uniforms:" << endl;
+	for (auto &uni : uniforms)
+		INFO_LOG() << "\t\"" << uni << "\" : " << m_shader(uni) << endl;
+}
 
-	// Create geometry and topology
+void SDLGui::CreateSimpleColoredTriangle()
+{
 	vertices[0].color = glm::vec3(1,0,0);
-	vertices[1].color = glm::vec3(0,1,1);
+	vertices[1].color = glm::vec3(0,1,0);
 	vertices[2].color = glm::vec3(0,0,1);
 
 	vertices[0].position = glm::vec3(1,-1,0);
@@ -148,14 +158,88 @@ void SDLGui::OnInit()
 	indices[0] = 0;
 	indices[1] = 1;
 	indices[2] = 2;
+}
+
+void SDLGui::CreateRippleMesh()
+{
+	int count = 0;
+	int i = 0, j = 0;
+
+	for (j = 0; j <= NUM_Z; j++) {
+		for (i = 0; i <= NUM_X; i++) {
+			vertices[count++].position = glm::vec3(
+					((float(i)/(NUM_X-1)) * 2 - 1) * HALF_SIZE_X, 0,
+					((float(j)/(NUM_Z-1)) * 2 - 1) * HALF_SIZE_Z);
+		}
+	}
+	GLushort* id = &indices[0];
+	for (i = 0; i < NUM_Z; i++) {
+		for (j = 0; j < NUM_X; j++) {
+			int i0 = i * (NUM_X + 1) + j;
+			int i1 = i0 + 1;
+			int i2 = i0 + (NUM_X + 1);
+			int i3 = i2 + 1;
+			if ((j+1) % 2) {
+				*id++ = i0; *id++ = i2; *id++ = i1;
+				*id++ = i1; *id++ = i2; *id++ = i3;
+			} else {
+				*id++ = i0; *id++ = i2; *id++ = i3;
+				*id++ = i0; *id++ = i3; *id++ = i1;
+			}
+		}
+	}
+}
+
+void SDLGui::CreateGeometryAndTopology()
+{
+
+}
+
+void SDLGui::OnInit()
+{
+	vector<string> attributes;
+	vector<string> uniforms;
+
+	// Add attributes and uniforms to vectors
+	attributes.emplace_back("vVertex");
+	attributes.emplace_back("vColor");
+	uniforms.emplace_back("MVP");
+
+	// Load shaders
+	LoadShaders("shaders/shader1.vert", "shaders/shader1.frag", attributes, uniforms);
+
+//	m_shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/shader1.vert");
+//	m_shader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/shader1.frag");
+//	m_shader.CreateAndLinkProgram();
+//	m_shader.Use();
+//		m_shader.AddAttribute("vVertex");
+//		m_shader.AddAttribute("vColor");
+//		m_shader.AddUniform("MVP");
+//	m_shader.UnUse();
+//	std::cout << "Attribute: " << m_shader["vVertex"] << "," << m_shader["vColor"] << std::endl;
+
+	// Create geometry and topology
+	CreateSimpleColoredTriangle();
+//	vertices[0].color = glm::vec3(1,0,0);
+//	vertices[1].color = glm::vec3(0,1,1);
+//	vertices[2].color = glm::vec3(0,0,1);
+//
+//	vertices[0].position = glm::vec3(1,-1,0);
+//	vertices[1].position = glm::vec3(0,1,0);
+//	vertices[2].position = glm::vec3(-1,-1,0);
+//	vertices[0].position = glm::vec3(-1,-1,0);
+//	vertices[1].position = glm::vec3(0,1,0);
+//	vertices[2].position = glm::vec3(1,-1,0);
+
+//	indices[0] = 0;
+//	indices[1] = 1;
+//	indices[2] = 2;
 
 	GLsizei stride = sizeof(Vertex);//glm::vec3);//Vertex);//
-
 	printf("sizeof:\n\tstride=%ld, Vertex=%ld, vertices=%ld, glm::vec3=%ld\n", stride, sizeof(Vertex), sizeof(vertices), sizeof(glm::vec3));
 	printf("Vertex: %p offset: pos %ld, col %ld\n", &vertices[0], offsetof(Vertex, position), offsetof(Vertex, color));
 	printf("addr: %p, %p, %p\n", &vertices[0],&vertices[1],&vertices[2]);
 	printf("sizeof(indices)=%ld\n", sizeof(indices));
-
 
 	// Store the geometry and topology in the buffer objects
 	glGenVertexArrays(1, &vaoID);
@@ -180,6 +264,24 @@ void SDLGui::OnInit()
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndicesID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
+
+}
+
+
+void SDLGui::OnInit2()
+{
+	vector<string> attributes;
+	vector<string> uniforms;
+
+	// Add attributes and uniforms to vectors
+	attributes.emplace_back("vVertex");
+	uniforms.emplace_back("MVP");
+	uniforms.emplace_back("time");
+
+	// Load shaders
+	LoadShaders("shaders/ripple_shader.vert",
+				"shaders/ripple_shader.frag", attributes, uniforms);
+
 
 }
 
