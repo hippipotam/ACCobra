@@ -12,6 +12,7 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <vector>
+#include <chrono>
 #include "GLSLShader.h"
 
 
@@ -19,12 +20,15 @@ const int SCREEN_FULLSCREEN = 1;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
-const int NUM_X = 3;
-const int NUM_Z = 3;
-const int SIZE_X = 3;
-const int SIZE_Z = 3;
+const int NUM_X = 12;
+const int NUM_Z = 12;
+const int SIZE_X = NUM_X;
+const int SIZE_Z = NUM_Z;
 const int HALF_SIZE_X = SIZE_X / 2;
 const int HALF_SIZE_Z = SIZE_Z / 2;
+const int TOTAL_INDICES = SIZE_X * SIZE_Z;
+
+const float SPEED = 10.f;
 
 class SDLGui {
 	SDL_Window *m_window;
@@ -38,8 +42,8 @@ class SDLGui {
 		glm::vec3 color;
 	};
 
-	Vertex vertices[3];
-	GLushort indices[3];
+	Vertex vertices[NUM_X*NUM_Z];
+	GLushort indices[NUM_X*NUM_Z];
 
 	GLuint m_vaoID;
 	GLuint m_vboVerticesID;
@@ -49,9 +53,15 @@ class SDLGui {
 	glm::mat4 MV;
 
 	float m_aspect;
+	bool m_state;
+	int oldX, oldY;
+	float dist = 1.f;
+	float rX = 0.f, rY = 0.f;
+	std::chrono::steady_clock::time_point begin;
+	std::chrono::steady_clock::time_point elapsed;
 
 private:
-	void OnResize(int w, int h);
+	void OnResize(int w, int h, bool perspective);
 	/* \brief Load shaders
 	 * 	\param vshader		path to vertex shader
 	 * 	\param fhsader		path to fragment shader
@@ -77,13 +87,16 @@ public:
 	void SoftwareVersions();
 
 	void OnShutdown();
-	void Resize();
+	void Resize(bool perspective);
 
 	void OnInit();
 	void OnInitRippleMesh();
 
 	void OnRender();
 	void OnRenderRippleMesh();
+
+	void OnMouseDown(SDL_MouseButtonEvent button, bool up, int x, int y);
+	void OnMouseMove(int x, int y);
 
 	void SwapWindow();
 

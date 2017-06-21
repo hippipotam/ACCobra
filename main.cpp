@@ -7,6 +7,8 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <unistd.h>
+#include <cstdio>
 
 #include "SDLGui.h"
 #include "log.h"
@@ -45,27 +47,42 @@ int main(int argc, char *argv[])
 
 	if (!SDLGuiWrapper.Init("OpenGL 4.5")) {
 		// TODO exit
-		ERRO_LOG() << "Can't initialize openGL";
+		ERROR_LOG() << "Can't initialize openGL";
 		exit(1);
 	}
 
-	SDLGuiWrapper.OnInit();
+	SDLGuiWrapper.OnInitRippleMesh();
 	printf("WSize [ %d; %d ]\n", w, h);
-	SDLGuiWrapper.Resize();
+	SDLGuiWrapper.Resize(true);
+
 
 	while (!quit) {
+
 		while (SDL_PollEvent(&ev)) {
-			if (ev.type == SDL_QUIT || ev.key.keysym.sym == SDLK_q)
+			if (ev.type == SDL_QUIT) {// || ev.key.keysym.sym == SDLK_q) {
 				quit = true;
-			else if (ev.key.keysym.sym == SDLK_f) {
+				printf("Quit\n"); // TODO QUIT!???
+			} else if (ev.key.keysym.sym == SDLK_f) {
 				gRenderQuad = true;
 				printf("render quad!\n");
+			} else if (ev.type == SDL_MOUSEBUTTONDOWN) {
+//				DEBUG_LOG() << "Mouse button DOWN! pos [" << ev.button.x << ":" << ev.button.y << "]" << std::endl;
+				SDLGuiWrapper.OnMouseDown(ev.button, false, ev.button.x, ev.button.y);
+			} else if (ev.type == SDL_MOUSEBUTTONUP) {
+//				DEBUG_LOG() << "Mouse button UP! pos [" << ev.button.x << ":" << ev.button.y << "]" << std::endl;
+				SDLGuiWrapper.OnMouseDown(ev.button, true, ev.button.x, ev.button.y);
+			} else if (ev.type == SDL_MOUSEMOTION) {
+				SDLGuiWrapper.OnMouseMove(ev.button.x, ev.button.y);
 			}
 		}
-		SDLGuiWrapper.OnRender();
+		SDLGuiWrapper.OnRenderRippleMesh();
 
 		SDLGuiWrapper.SwapWindow();
+		usleep(10000);
 	}
+
+	// TODO
+
 
 	/* Delete our opengl context, destroy our window, and shutdown SDL */
 	SDLGuiWrapper.OnShutdown();

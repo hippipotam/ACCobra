@@ -10,10 +10,13 @@
 
 using namespace std;
 
+
 SDLGui::SDLGui() :
 	m_window(nullptr),
-	m_maincontext(nullptr)
+	m_maincontext(nullptr),
+	m_state(false)
 {
+	begin = chrono::steady_clock::now();
 }
 
 SDLGui::~SDLGui() {
@@ -28,7 +31,7 @@ bool SDLGui::Init(const char *caption)
 
 	// Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		ERRO_LOG() << "Couldn't initialize SDL.";
+		ERROR_LOG() << "Couldn't initialize SDL.";
 		return false;
 	}
 	//		sdl_die("Couldn't initialize SDL.");
@@ -51,14 +54,14 @@ bool SDLGui::Init(const char *caption)
 								SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL
 								);
 	if (m_window == nullptr) {
-		ERRO_LOG() << "Couldn't create window";
+		ERROR_LOG() << "Couldn't create window";
 		return false;
 	}
 //		sdl_die("Couldn't set video mode");
 
 	m_maincontext = SDL_GL_CreateContext(m_window);
 	if (m_maincontext == nullptr) {
-		ERRO_LOG() << "Failed to create OpenGL context";
+		ERROR_LOG() << "Failed to create OpenGL context";
 		return false;
 	}
 //		sdl_die("Failed to create OpenGL context");
@@ -93,29 +96,33 @@ void SDLGui::SoftwareVersions()
 
 void SDLGui::OnShutdown()
 {
+	INFO_LOG() << "Shutdown" << endl;
 	m_shader.DeleteShaderProgram();
 	glDeleteBuffers(1, &m_vboVerticesID);
 	glDeleteBuffers(1, &m_vboIndicesID);
 	glDeleteVertexArrays(1, &m_vaoID);
 }
 
-void SDLGui::OnResize(int w, int h) {
+void SDLGui::OnResize(int w, int h, bool perspective) {
 
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	m_aspect = float(h) / float(w);
-	// Set up the orthographic projection matrix
-	P = glm::ortho(-1.f,1.f,-1.f,1.f);
+	if (perspective)
+		// Set up the perspective projection matrix
+		P = glm::perspective(45.0f, (GLfloat)w/h, 1.f, 1000.f);
+	else
+		// Set up the orthographic projection matrix
+		P = glm::ortho(-1.f,1.f,-1.f,1.f);
 
-	// Set up the perspective projection matrix
-//	P = glm::perspective(45.0f, (GLfloat)w/h, 1.f, 1000.f);
+
 
 }
 
-void SDLGui::Resize()
+void SDLGui::Resize(bool perspective)
 {
 	int w, h;
 	SDL_GetWindowSize(m_window, &w, &h);
-	OnResize(w, h);
+	OnResize(w, h, perspective);
 
 }
 
@@ -273,6 +280,8 @@ void SDLGui::OnInitRippleMesh()
 
 	StoreGeometryAndTopology(attributes);
 
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 }
 
 void SDLGui::OnRender()
@@ -296,18 +305,54 @@ void SDLGui::OnRender()
 
 void SDLGui::OnRenderRippleMesh()
 {
-	int time = 0;
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	chrono::duration<double> elapsed = chrono::duration_cast<chrono::duration<double>>(end - begin);
+	begin = end;
+	float time = elapsed.count() * SPEED;
+//	INFO_LOG() << elapsed.count() << " : " << time << endl;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//	glm::mat4 T = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, dist));
-//	glm::mat4 Rx = glm::rotate(T, rX, glm::vec3(1.0f, 0.0f, 0.0f));
-//	glm::mat4 MV = glm::rotate(Rx, rY, glm::vec3(0.0f, 1.0f, 0.0f));
-//	glm::mat4 MVP = P * MV;
+	glm::mat4 T = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, dist));
+	glm::mat4 Rx = glm::rotate(T, rX, glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 MV = glm::rotate(Rx, rY, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 MVP = P * MV;
+
+	m_shader.Use();
+		glUniformMatrix4fv(m_shader("MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+		glUniform1f(m_shader("time"), time);
+		glDrawElements(GL_TRIANGLES, TOTAL_INDICES, GL_UNSIGNED_SHORT, 0);
+	m_shader.UnUse();
+
+//	auto end = chrono::high_resolution_clock::now();
+//	auto elapsed_mcs_2 = chrono::duration_cast<chrono::microseconds>(end - begin);
 //
-//	m_shader.Use();
-//		glUniformMatrix4fv(m_shader("MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
-//		glUniform1f(m_shader("time"), time);
-//		glDrawElements(GL_TRIANGLES, TOTAL_INDICES, GL_UNSIGNED_SHORT, 0);
-//	m_shader.UnUse();
+//	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+//	std::chrono::duration<double> elapsed_mcs_2 = std::chrono::duration_cast<std::chrono::duration<double>>(end - begin);
+//	std::cout << "It took me " << elapsed_mcs_2.count() << " seconds" << std::endl;
+}
+
+void SDLGui::OnMouseDown(SDL_MouseButtonEvent button, bool up, int x, int y)
+{
+	if (!up) {
+		oldX = x;
+		oldY = y;
+		DEBUG_LOG() << oldX << " " << oldY << endl;
+	}
+	if ( button.button == SDL_BUTTON_LEFT) {
+		DEBUG_LOG() << "Left mouse button clicked! pos [" << x << ":" << y << "]" << endl;
+		m_state = false;
+	} else m_state = true;
+}
+
+void SDLGui::OnMouseMove(int x, int y)
+{
+	if (m_state) {
+		dist *= (1 + (y - oldY)/60.0f);
+	} else {
+		rY += (x - oldX) / 5.0f;
+		rX += (y - oldY) / 5.0f;
+	}
+	oldX = x;
+	oldY = y;
 }

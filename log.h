@@ -10,8 +10,9 @@
 
 #include <iostream>
 
-#define INFO_LOG() std::cout << "[ " << __FUNCTION__ << " ]: "
-#define ERRO_LOG() std::cerr << "[ " << __FUNCTION__ << " ]: "
+#define INFO_LOG() std::cout << "[ " << __FUNCTION__ << " ] [ INFO ]: "
+#define DEBUG_LOG() std::cout << "[ " << __FUNCTION__ << " ] [ DEBUG ]: "
+#define ERROR_LOG() std::cerr << "[ " << __FUNCTION__ << " ] [ ERROR ]: "
 
 //#define INFO_LOG(...) fprintf(cerr, __VA_ARGS__);
 //cout << "[ INFO ]-[ " << __FUNCTION__ << " ]: " << __VA_ARGS__ << endl
