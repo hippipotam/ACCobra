@@ -94,15 +94,21 @@ void SDLGui::SoftwareVersions()
 void SDLGui::OnShutdown()
 {
 	m_shader.DeleteShaderProgram();
-	glDeleteBuffers(1, &vboVerticesID);
-	glDeleteBuffers(1, &vboIndicesID);
-	glDeleteVertexArrays(1, &vaoID);
+	glDeleteBuffers(1, &m_vboVerticesID);
+	glDeleteBuffers(1, &m_vboIndicesID);
+	glDeleteVertexArrays(1, &m_vaoID);
 }
 
 void SDLGui::OnResize(int w, int h) {
+
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
-	g_aspect = float(h) / float(w);
-	P = glm::ortho(-1,1,-1,1);
+	m_aspect = float(h) / float(w);
+	// Set up the orthographic projection matrix
+	P = glm::ortho(-1.f,1.f,-1.f,1.f);
+
+	// Set up the perspective projection matrix
+//	P = glm::perspective(45.0f, (GLfloat)w/h, 1.f, 1000.f);
+
 }
 
 void SDLGui::Resize()
@@ -195,6 +201,31 @@ void SDLGui::CreateGeometryAndTopology()
 
 }
 
+void SDLGui::StoreGeometryAndTopology(vector<string> attributes, GLsizei stride)
+{
+	glGenVertexArrays(1, &m_vaoID);
+	glGenBuffers(1, &m_vboVerticesID);
+	glGenBuffers(1, &m_vboIndicesID);
+	glBindVertexArray(m_vaoID);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vboVerticesID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
+
+	//	printf("shader[\"vVertex\"]=%d\n", m_shader["vVertex"]);
+	//	printf("shader[\"vColor\"]= %d\n", m_shader["vColor"]);
+	//	printf("size(Vertex.position)=%ld\n", sizeof(vertices[0].position));
+	//	printf("size(GLfloat)");
+	//	printf("size(vertices[0].position.x)=%ld\n", sizeof(vertices[0].position.x));
+	////	printf("v0p= %d\n", vertices[0].position.length());
+
+	for (auto &attr : attributes) {
+		glEnableVertexAttribArray(m_shader[attr]);
+		glVertexAttribPointer(m_shader[attr], 3, GL_FLOAT, GL_FALSE, stride, (attr == "vColor" ? (const GLvoid*)offsetof(Vertex, color) : 0));
+	}
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vboIndicesID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
+}
+
 void SDLGui::OnInit()
 {
 	vector<string> attributes;
@@ -208,67 +239,23 @@ void SDLGui::OnInit()
 	// Load shaders
 	LoadShaders("shaders/shader1.vert", "shaders/shader1.frag", attributes, uniforms);
 
-//	m_shader.LoadFromFile(GL_VERTEX_SHADER, "shaders/shader1.vert");
-//	m_shader.LoadFromFile(GL_FRAGMENT_SHADER, "shaders/shader1.frag");
-//	m_shader.CreateAndLinkProgram();
-//	m_shader.Use();
-//		m_shader.AddAttribute("vVertex");
-//		m_shader.AddAttribute("vColor");
-//		m_shader.AddUniform("MVP");
-//	m_shader.UnUse();
-//	std::cout << "Attribute: " << m_shader["vVertex"] << "," << m_shader["vColor"] << std::endl;
-
 	// Create geometry and topology
 	CreateSimpleColoredTriangle();
-//	vertices[0].color = glm::vec3(1,0,0);
-//	vertices[1].color = glm::vec3(0,1,1);
-//	vertices[2].color = glm::vec3(0,0,1);
-//
-//	vertices[0].position = glm::vec3(1,-1,0);
-//	vertices[1].position = glm::vec3(0,1,0);
-//	vertices[2].position = glm::vec3(-1,-1,0);
-//	vertices[0].position = glm::vec3(-1,-1,0);
-//	vertices[1].position = glm::vec3(0,1,0);
-//	vertices[2].position = glm::vec3(1,-1,0);
-
-//	indices[0] = 0;
-//	indices[1] = 1;
-//	indices[2] = 2;
 
 	GLsizei stride = sizeof(Vertex);//glm::vec3);//Vertex);//
-	printf("sizeof:\n\tstride=%ld, Vertex=%ld, vertices=%ld, glm::vec3=%ld\n", stride, sizeof(Vertex), sizeof(vertices), sizeof(glm::vec3));
-	printf("Vertex: %p offset: pos %ld, col %ld\n", &vertices[0], offsetof(Vertex, position), offsetof(Vertex, color));
-	printf("addr: %p, %p, %p\n", &vertices[0],&vertices[1],&vertices[2]);
-	printf("sizeof(indices)=%ld\n", sizeof(indices));
+
+//	printf("sizeof:\n\tstride=%ld, Vertex=%ld, vertices=%ld, glm::vec3=%ld\n", stride, sizeof(Vertex), sizeof(vertices), sizeof(glm::vec3));
+//	printf("Vertex: %p offset: pos %ld, col %ld\n", &vertices[0], offsetof(Vertex, position), offsetof(Vertex, color));
+//	printf("addr: %p, %p, %p\n", &vertices[0],&vertices[1],&vertices[2]);
+//	printf("sizeof(indices)=%ld\n", sizeof(indices));
 
 	// Store the geometry and topology in the buffer objects
-	glGenVertexArrays(1, &vaoID);
-	glGenBuffers(1, &vboVerticesID);
-	glGenBuffers(1, &vboIndicesID);
-	glBindVertexArray(vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, vboVerticesID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
-
-	printf("shader[\"vVertex\"]=%d\n", m_shader["vVertex"]);
-	printf("shader[\"vColor\"]= %d\n", m_shader["vColor"]);
-	printf("size(Vertex.position)=%ld\n", sizeof(vertices[0].position));
-	printf("size(GLfloat)");
-	printf("size(vertices[0].position.x)=%ld\n", sizeof(vertices[0].position.x));
-//	printf("v0p= %d\n", vertices[0].position.length());
-
-	glEnableVertexAttribArray(m_shader["vVertex"]);
-	glVertexAttribPointer(m_shader["vVertex"], 3, GL_FLOAT, GL_FALSE, stride, 0);
-
-	glEnableVertexAttribArray(m_shader["vColor"]);
-	glVertexAttribPointer(m_shader["vColor"], 3, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)offsetof(Vertex, color));
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndicesID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
+	StoreGeometryAndTopology(attributes, stride);
 
 }
 
 
-void SDLGui::OnInit2()
+void SDLGui::OnInitRippleMesh()
 {
 	vector<string> attributes;
 	vector<string> uniforms;
@@ -282,15 +269,16 @@ void SDLGui::OnInit2()
 	LoadShaders("shaders/ripple_shader.vert",
 				"shaders/ripple_shader.frag", attributes, uniforms);
 
+	CreateRippleMesh();
+
+	StoreGeometryAndTopology(attributes);
 
 }
 
 void SDLGui::OnRender()
 {
-//	glm::mat4 model_matrix;
 	// Setup
 	glEnable(GL_CULL_FACE);
-
 	glDisable(GL_DEPTH_TEST);
 
 	// Clear color buffer
@@ -304,8 +292,22 @@ void SDLGui::OnRender()
 		glUniformMatrix4fv(m_shader("MVP"), 1, GL_FALSE, glm::value_ptr(P*MV));
 		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
 	m_shader.UnUse();
+}
 
-//	SDL_GetWindowSize(g_window, &w, &h);
-//	glViewport(0, 0, w, h);
-//	glClearColor(0.0f, 0.2f, 0.4f, 0.0f);
+void SDLGui::OnRenderRippleMesh()
+{
+	int time = 0;
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//	glm::mat4 T = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, dist));
+//	glm::mat4 Rx = glm::rotate(T, rX, glm::vec3(1.0f, 0.0f, 0.0f));
+//	glm::mat4 MV = glm::rotate(Rx, rY, glm::vec3(0.0f, 1.0f, 0.0f));
+//	glm::mat4 MVP = P * MV;
+//
+//	m_shader.Use();
+//		glUniformMatrix4fv(m_shader("MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+//		glUniform1f(m_shader("time"), time);
+//		glDrawElements(GL_TRIANGLES, TOTAL_INDICES, GL_UNSIGNED_SHORT, 0);
+//	m_shader.UnUse();
 }

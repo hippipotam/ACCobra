@@ -41,29 +41,32 @@ class SDLGui {
 	Vertex vertices[3];
 	GLushort indices[3];
 
-	GLuint vaoID;
-	GLuint vboVerticesID;
-	GLuint vboIndicesID;
+	GLuint m_vaoID;
+	GLuint m_vboVerticesID;
+	GLuint m_vboIndicesID;
 
 	glm::mat4 P;
 	glm::mat4 MV;
 
-	float g_aspect;
+	float m_aspect;
 
 private:
 	void OnResize(int w, int h);
-	/* Load shaders
-	 * 	vshader		: path to vertex shader
-	 * 	fhsader		: path to fragment shader
-	 * 	attributes	: attributes
-	 * 	uniforms	: uniforms
+	/* \brief Load shaders
+	 * 	\param vshader		path to vertex shader
+	 * 	\param fhsader		path to fragment shader
+	 * 	\param attributes	attributes
+	 * 	\param uniforms		uniforms
 	 */
 	void LoadShaders(const std::string& vshader, const std::string& fshader, std::vector<std::string> attributes, std::vector<std::string> uniforms);
 
-	/* Create geometry and topology */
+	/** Create geometry and topology */
 	void CreateSimpleColoredTriangle();
 	void CreateRippleMesh();
 	void CreateGeometryAndTopology();
+
+	// Store the geometry and topology in the buffer objects
+	void StoreGeometryAndTopology(std::vector<std::string> attributes, GLsizei stride = 0);
 
 public:
 	SDLGui();
@@ -77,9 +80,10 @@ public:
 	void Resize();
 
 	void OnInit();
-	void OnInit2();
+	void OnInitRippleMesh();
 
 	void OnRender();
+	void OnRenderRippleMesh();
 
 	void SwapWindow();
 

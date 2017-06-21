@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
 
 	SDLGuiWrapper.OnInit();
 	printf("WSize [ %d; %d ]\n", w, h);
+	SDLGuiWrapper.Resize();
 
 	while (!quit) {
 		while (SDL_PollEvent(&ev)) {
