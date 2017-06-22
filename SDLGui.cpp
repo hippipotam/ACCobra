@@ -337,7 +337,7 @@ void SDLGui::OnMouseDown(SDL_MouseButtonEvent button, bool up, int x, int y)
 	if (!up) {
 		oldX = x;
 		oldY = y;
-		DEBUG_LOG() << oldX << " " << oldY << endl;
+		DEBUG_LOG() << "Release mousdw button" << oldX << " " << oldY << endl;
 	}
 	if ( button.button == SDL_BUTTON_LEFT) {
 		DEBUG_LOG() << "Left mouse button clicked! pos [" << x << ":" << y << "]" << endl;
