@@ -72,6 +72,7 @@ private:
 
 	/** Create geometry and topology */
 	void CreateSimpleColoredTriangle();
+	void CreateQuad();
 	void CreateRippleMesh();
 	void CreateGeometryAndTopology();
 

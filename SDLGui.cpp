@@ -66,6 +66,7 @@ bool SDLGui::Init(const char *caption)
 	}
 //		sdl_die("Failed to create OpenGL context");
 
+	INFO_LOG() << "OpenGL loaded" << endl;
 	// Load OpenGL functions glad SDL
 	gladLoadGLLoader(SDL_GL_GetProcAddress);
 
@@ -157,6 +158,17 @@ void SDLGui::LoadShaders(const string& vshader, const string& fshader, vector<st
 
 void SDLGui::CreateSimpleColoredTriangle()
 {
+	/*
+	 * 			2
+	 *         / \
+	 *  	  /   \
+	 *       /     \
+	 *      /       \
+	 *     /         \
+	 * 	  /			  \
+	 *  3 ------------- 1
+	 */
+
 	vertices[0].color = glm::vec3(1,0,0);
 	vertices[1].color = glm::vec3(0,1,0);
 	vertices[2].color = glm::vec3(0,0,1);
@@ -173,6 +185,33 @@ void SDLGui::CreateSimpleColoredTriangle()
 	indices[2] = 2;
 }
 
+void SDLGui::CreateQuad()
+{
+
+	/*
+	 *
+	 * 	3---------- 2
+	 * 	|			|
+	 * 	|			|
+	 *  |			|
+	 *  4 ----------1
+	 */
+	vertices[0].color = glm::vec3(1,0,0);
+	vertices[1].color = glm::vec3(0,1,0);
+	vertices[2].color = glm::vec3(0,0,1);
+	vertices[3].color = glm::vec3(0,1,0);
+
+	vertices[0].position = glm::vec3( 0.5,-0.5, 0);
+	vertices[1].position = glm::vec3( 0.5, 0.5, 0);
+	vertices[2].position = glm::vec3(-0.5, 0.5, 0);
+	vertices[3].position = glm::vec3( 0,1, 0);
+
+	indices[0] = 0;
+	indices[1] = 1;
+	indices[2] = 2;
+	indices[3] = 3;
+}
+
 void SDLGui::CreateRippleMesh()
 {
 	int count = 0;
@@ -181,7 +220,8 @@ void SDLGui::CreateRippleMesh()
 	for (j = 0; j <= NUM_Z; j++) {
 		for (i = 0; i <= NUM_X; i++) {
 			vertices[count++].position = glm::vec3(
-					((float(i)/(NUM_X-1)) * 2 - 1) * HALF_SIZE_X, 0,
+					((float(i)/(NUM_X-1)) * 2 - 1) * HALF_SIZE_X,
+					0,
 					((float(j)/(NUM_Z-1)) * 2 - 1) * HALF_SIZE_Z);
 		}
 	}
@@ -205,7 +245,28 @@ void SDLGui::CreateRippleMesh()
 
 void SDLGui::CreateGeometryAndTopology()
 {
+	int count = 0;
+	int i, j;
 
+	for (j = 0; j <= NUM_Z; j++) {
+		for (i = 0; i <= NUM_X; i++) {
+			vertices[count++].position = glm::vec3(
+					((float(i)/(NUM_X-1)) * 2 - 1) * HALF_SIZE_X, 0,
+					((float(j)/(NUM_Z-1)) * 2 - 1) * HALF_SIZE_Z);
+		}
+	}
+
+	GLushort* id=&indices[0];
+	for (i = 0; i < NUM_Z; i++) {
+		for (j = 0; j < NUM_X; j++) {
+			int i0 = i * (NUM_X+1) + j;
+			int i1 = i0 + 1;
+			int i2 = i0 + (NUM_X+1);
+			int i3 = i2 + 1;
+			*id++ = i0; *id++ = i2; *id++ = i1;
+			*id++ = i1; *id++ = i2; *id++ = i3;
+		}
+	}
 }
 
 void SDLGui::StoreGeometryAndTopology(vector<string> attributes, GLsizei stride)
@@ -247,7 +308,8 @@ void SDLGui::OnInit()
 	LoadShaders("shaders/shader1.vert", "shaders/shader1.frag", attributes, uniforms);
 
 	// Create geometry and topology
-	CreateSimpleColoredTriangle();
+	CreateQuad();
+//	CreateSimpleColoredTriangle();
 
 	GLsizei stride = sizeof(Vertex);//glm::vec3);//Vertex);//
 
@@ -276,7 +338,8 @@ void SDLGui::OnInitRippleMesh()
 	LoadShaders("shaders/ripple_shader.vert",
 				"shaders/ripple_shader.frag", attributes, uniforms);
 
-	CreateRippleMesh();
+//	CreateRippleMesh();
+	CreateGeometryAndTopology();
 
 	StoreGeometryAndTopology(attributes);
 
@@ -305,11 +368,12 @@ void SDLGui::OnRender()
 
 void SDLGui::OnRenderRippleMesh()
 {
-	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	chrono::steady_clock::time_point end = chrono::steady_clock::now();
 	chrono::duration<double> elapsed = chrono::duration_cast<chrono::duration<double>>(end - begin);
 	begin = end;
 	float time = elapsed.count() * SPEED;
-//	INFO_LOG() << elapsed.count() << " : " << time << endl;
+	INFO_LOG() << elapsed.count() << " : " << time << endl;
+	INFO_LOG() << "Distance:" << dist << endl;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -323,13 +387,6 @@ void SDLGui::OnRenderRippleMesh()
 		glUniform1f(m_shader("time"), time);
 		glDrawElements(GL_TRIANGLES, TOTAL_INDICES, GL_UNSIGNED_SHORT, 0);
 	m_shader.UnUse();
-
-//	auto end = chrono::high_resolution_clock::now();
-//	auto elapsed_mcs_2 = chrono::duration_cast<chrono::microseconds>(end - begin);
-//
-//	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-//	std::chrono::duration<double> elapsed_mcs_2 = std::chrono::duration_cast<std::chrono::duration<double>>(end - begin);
-//	std::cout << "It took me " << elapsed_mcs_2.count() << " seconds" << std::endl;
 }
 
 void SDLGui::OnMouseDown(SDL_MouseButtonEvent button, bool up, int x, int y)
@@ -337,7 +394,7 @@ void SDLGui::OnMouseDown(SDL_MouseButtonEvent button, bool up, int x, int y)
 	if (!up) {
 		oldX = x;
 		oldY = y;
-		DEBUG_LOG() << "Release mousdw button" << oldX << " " << oldY << endl;
+		DEBUG_LOG() << "Release mouse button" << oldX << " " << oldY << endl;
 	}
 	if ( button.button == SDL_BUTTON_LEFT) {
 		DEBUG_LOG() << "Left mouse button clicked! pos [" << x << ":" << y << "]" << endl;
@@ -348,11 +405,12 @@ void SDLGui::OnMouseDown(SDL_MouseButtonEvent button, bool up, int x, int y)
 void SDLGui::OnMouseMove(int x, int y)
 {
 	if (m_state) {
-		dist *= (1 + (y - oldY)/60.0f);
+		dist *= (1 + (y - oldY) / 60.0f);
 	} else {
 		rY += (x - oldX) / 5.0f;
 		rX += (y - oldY) / 5.0f;
 	}
 	oldX = x;
 	oldY = y;
+	// glutPostRedisplay();
 }

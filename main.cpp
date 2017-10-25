@@ -51,9 +51,9 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	SDLGuiWrapper.OnInitRippleMesh();
+	SDLGuiWrapper.OnInit();//OnInitRippleMesh();
 	printf("WSize [ %d; %d ]\n", w, h);
-	SDLGuiWrapper.Resize(true);
+	SDLGuiWrapper.Resize(false);
 
 
 	while (!quit) {
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 				SDLGuiWrapper.OnMouseMove(ev.button.x, ev.button.y);
 			}
 		}
-		SDLGuiWrapper.OnRenderRippleMesh();
+		SDLGuiWrapper.OnRender();//.OnRenderRippleMesh();
 
 		SDLGuiWrapper.SwapWindow();
 		usleep(10000);
